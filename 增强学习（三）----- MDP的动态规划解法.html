@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://www.cnblogs.com/jinxulin/p/3526542.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>增强学习（三）----- MDP的动态规划解法 - 金溆林 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./增强学习（三）----- MDP的动态规划解法_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./增强学习（三）----- MDP的动态规划解法_files/bundle-SimpleClear.css">
+<link id="mobile-style" media="only screen and (max-width: 768px)" type="text/css" rel="stylesheet" href="./增强学习（三）----- MDP的动态规划解法_files/bundle-SimpleClear-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/jinxulin/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/jinxulin/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/jinxulin/wlwmanifest.xml">
+<script src="./增强学习（三）----- MDP的动态规划解法_files/jquery.js.下载" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'jinxulin', cb_enable_mathjax=true;var isLogined=false;</script>
+<script src="./增强学习（三）----- MDP的动态规划解法_files/blog-common.js.下载" type="text/javascript"></script>
+<script type="text/x-mathjax-config;executed=true">MathJax.Hub.Config({
+  tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] },
+  TeX: { equationNumbers: { autoNumber: ['AMS'], useLabelIds: true } },
+  'HTML-CSS': { linebreaks: { automatic: true } },
+  SVG: { linebreaks: { automatic: true } }});</script><script type="text/javascript" src="./增强学习（三）----- MDP的动态规划解法_files/MathJax.js.下载"></script><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+<body><div id="MathJax_Message" style="display: none;"></div>
+<a name="top"></a>
+
+<div id="main">
+<div id="header">
+<h1><a id="Header1_HeaderTitle" href="http://www.cnblogs.com/jinxulin/">Kintoki</a></h1>
+<p id="tagline">关注机器学习，数据挖掘，人工智能</p></div>
+
+<div id="post_detail">
+<div class="post">
+    <h2 class="postTitle"><a id="cb_post_title_url" href="http://www.cnblogs.com/jinxulin/p/3526542.html">增强学习（三）----- MDP的动态规划解法</a></h2>
+    <div class="postText"><div id="cnblogs_post_body"><p><span style="font-size: 14px;">上一篇我们已经说到了，增强学习的目的就是求解马尔可夫决策过程(MDP)的最优策略，使其在任意初始状态下，都能获得最大的V<sup>π</sup>值。(本文不考虑非马尔可夫环境和不完全可观测马尔可夫决策过程(POMDP)中的增强学习)。</span></p>
+<p><span style="font-size: 14px;">那么如何求解最优策略呢？基本的解法有三种：</span></p>
+<p><span style="font-size: 14px;"><span style="color: #ff0000;">动态规划法</span>(dynamic programming methods)</span></p>
+<p><span style="font-size: 14px;"><span style="color: #ff0000;">蒙特卡罗方法</span>(Monte Carlo methods)</span></p>
+<p><span style="font-size: 14px;"><span style="color: #ff0000;">时间差分法</span>(temporal difference)。</span></p>
+<p><span style="font-size: 14px;">动态规划法是其中最基本的算法，也是理解后续算法的基础，因此本文先介绍动态规划法求解MDP。本文假设拥有MDP模型M=(S, A, P<sub>sa</sub>, R)的完整知识。</span></p>
+<p><span style="color: #00ccff; font-size: 14px;"><span style="font-family: 微软雅黑;">1. 贝尔曼方程（</span><span style="font-family: Times New Roman;">Bellman Equation</span><span style="font-family: 微软雅黑;">）</span></span></p>
+<p><span style="font-size: 14px;">上一篇我们得到了V<sup>π</sup>和Q<sup>π</sup>的表达式，并且写成了如下的形式</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019351882.png" alt=""></span></p>
+<p><span style="font-size: 14px;">在动态规划中，上面两个式子称为<span style="color: #ff0000;">贝尔曼方程</span>，它<span style="color: #ff0000;">表明了当前状态的值函数与下个状态的值函数的关系</span>。</span></p>
+<p><span style="font-size: 14px;">优化目标π*可以表示为：<img src="./增强学习（三）----- MDP的动态规划解法_files/201019355785.png" alt=""></span></p>
+<p><span style="font-size: 14px;">分别记最优策略π*对应的状态值函数和行为值函数为V*(s)和Q*(s, a)，</span><span style="font-size: 14px;">由它们的定义容易知道，V*(s)和Q*(s, a)存在如下关系:<img src="./增强学习（三）----- MDP的动态规划解法_files/201019377660.png" alt=""></span></p>
+<p><span style="font-size: 14px;">状态值函数和行为值函数分别满足如下<span style="color: red;">贝尔曼最优性方程(Bellman optimality equation)</span>：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019379691.png" alt=""></span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019398446.png" alt=""></span></p>
+<p><span style="font-size: 14px;">有了贝尔曼方程和贝尔曼最优性方程后，我们就可以用动态规划来求解MDP了。</span></p>
+<p><span style="color: #00ccff; font-size: 14px;"><span style="font-family: 微软雅黑; font-size: 15px;">2. 策略估计</span><span style="font-family: Times New Roman;"><span style="font-size: 15px;">(Policy Evaluation)</span> </span></span></p>
+<p><span style="font-size: 14px;">首先，对于任意的策略π，我们如何计算其状态值函数V<sup>π</sup>(s)？这个问题被称作<span style="color: #ff0000;">策略估计</span>，</span></p>
+<p><span style="font-size: 14px;">前面讲到对于确定性策略，值函数<img src="./增强学习（三）----- MDP的动态规划解法_files/201019402195.png" alt=""></span></p>
+<p><span style="font-size: 14px;">现在扩展到更一般的情况，如果在某策略π下，π(s)对应的动作a有多种可能，每种可能记为π(a|s)，则状态值函数定义如下：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019409535.png" alt=""></span></p>
+<p><span style="font-size: 14px;">一般采用迭代的方法更新状态值函数，首先将所有V<sup>π</sup>(s)的初值赋为0（其他状态也可以赋为任意值，不过吸收态必须赋0值），然后采用如下式子更新所有状态s的值函数（第k+1次迭代）：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019411259.png" alt=""></span></p>
+<p><span style="font-size: 14px;">对于V<sup>π</sup>(s)，有两种更新方法，</span></p>
+<p><span style="font-size: 14px;">第一种：将第k次迭代的各状态值函数[V<sup>k</sup>(s<sub>1</sub>),V<sup>k</sup>(s<sub>2</sub>),V<sup>k</sup>(s<sub>3</sub>)..]保存在一个数组中，第k+1次的V<sup>π</sup>(s)采用第k次的V<sup>π</sup>(s')来计算，并将结果保存在第二个数组中。</span></p>
+<p><span style="font-size: 14px;">第二种：即仅用一个数组保存各状态值函数，每当得到一个新值，就将旧的值覆盖,形如[V<sup>k+1</sup>(s<sub>1</sub>),V<sup>k+1</sup>(s<sub>2</sub>),V<sup>k</sup>(s<sub>3</sub>)..]，第k+1次迭代的V<sup>π</sup>(s)可能用到第k+1次迭代得到的V<sup>π</sup>(s')。</span></p>
+<p><span style="font-size: 14px;">通常情况下，我们采用第二种方法更新数据，因为它及时利用了新值，能更快的收敛。整个策略估计算法如下图所示：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019414696.png" alt=""></span></p>
+<p><span style="color: #0070c0; font-size: 14px;"><span style="color: #00ccff; font-family: 微软雅黑;">3. 策略改进</span><span style="font-family: Times New Roman;"><span style="color: #00ccff;">(Policy Improvement)</span> </span></span></p>
+<p><span style="font-size: 14px;">上一节中进行策略估计的目的，是为了寻找更好的策略，这个过程叫做<span style="color: #ff0000;">策略改进</span>(Policy Improvement)。</span></p>
+<p><span style="font-size: 14px;">假设我们有一个策略π，并且确定了它的所有状态的值函数V<sup>π</sup>(s)。对于某状态s，有动作a<sub>0</sub>=π(s)。 那么如果我们在状态s下不采用动作a<sub>0</sub>，而采用其他动作a≠π(s)是否会更好呢？要判断好坏就需要我们计算行为值函数Q<sup>π</sup>(s,a)，公式我们前面已经说过：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019420000.png" alt=""></span></p>
+<p><span style="font-size: 14px;"><span style="color: #ff0000;">评判标准</span>是：Q<sup>π</sup>(s,a)是否大于V<sup>π</sup>(s)。如果Q<sup>π</sup>(s,a)&gt; V<sup>π</sup>(s)，那么至少说明新策略【仅在状态s下采用动作a，其他状态下遵循策略π】比旧策略【所有状态下都遵循策略π】整体上要更好。</span></p>
+<p><span style="font-size: 14px;"><span style="color: red;"><span style="font-family: 宋体;">策略改进定理</span><span style="font-family: 微软雅黑;">(policy improvement theorem)</span><span style="font-family: 宋体;">：</span></span><span style="font-family: 宋体;">π和π</span><span style="font-family: 微软雅黑;">'</span><span style="font-family: 宋体;">是两个确定的策略，如果对所有状态</span><span style="font-family: 微软雅黑;">s</span><span style="font-family: 宋体;">∈</span><span style="font-family: 微软雅黑;">S</span><span style="font-family: 宋体;">有</span><span style="font-family: 微软雅黑;">Q</span><span style="font-family: 宋体;"><sup>π</sup></span><span style="font-family: 微软雅黑;">(s,</span><span style="font-family: 宋体;">π</span><span style="font-family: 微软雅黑;">'(s))</span><span style="font-family: 宋体;">≥</span><span style="font-family: 微软雅黑;">V</span><span style="font-family: 宋体;"><sup>π</sup></span><span style="font-family: 微软雅黑;">(s)</span><span style="font-family: 宋体;">，那么策略π</span><span style="font-family: 微软雅黑;">'</span><span style="font-family: 宋体;">必然比策略π更好，或者至少一样好。其中的不等式等价于</span><span style="font-family: 微软雅黑;">V</span><span style="font-family: 宋体;"><sup>π</sup></span><span style="font-family: 微软雅黑;"><sup>'</sup>(s)</span><span style="font-family: 宋体;">≥</span><span style="font-family: 微软雅黑;">V</span><span style="font-family: 宋体;"><sup>π</sup></span><span style="font-family: 微软雅黑;">(s)</span><span style="font-family: 宋体;">。</span></span></p>
+<p><span style="font-size: 14px;">有了在某状态s上改进策略的方法和策略改进定理，我们可以遍历所有状态和所有可能的动作a，并采用贪心策略来获得新策略π'。即对所有的s∈S, 采用下式更新策略：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019423289.png" alt=""></span></p>
+<p><span style="font-size: 14px;">这种采用关于值函数的贪心策略获得新策略，改进旧策略的过程，称为策略改进(Policy Improvement)</span></p>
+<p><span style="font-size: 14px;">&nbsp;&nbsp;&nbsp;&nbsp;最后大家可能会疑惑，贪心策略能否收敛到最优策略，这里我们假设策略改进过程已经收敛，即对所有的s，V<sup>π'</sup>(s)等于V<sup>π</sup>(s)。那么根据上面的策略更新的式子，可以知道对于所有的s∈S下式成立：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019434382.png" alt=""></span></p>
+<p><span style="font-size: 14px;">可是这个式子正好就是我们在1中所说的Bellman optimality equation，所以π和π'都必然是最优策略！神奇吧！</span></p>
+<p><span style="color: #0070c0; font-size: 14px;"><span style="color: #00ccff; font-family: 微软雅黑;">4. 策略迭代</span><span style="font-family: Times New Roman;"><span style="color: #00ccff;">(Policy Iteration)</span> </span></span></p>
+<p><span style="font-size: 14px;">策略迭代算法就是上面两节内容的组合。假设我们有一个策略π，那么我们可以用policy evaluation获得它的值函数V<sup>π</sup>(s)，然后根据policy improvement得到更好的策略π'，接着再计算V<sup>π'</sup>(s),再获得更好的策略π''，整个过程顺序进行如下图所示：</span></p>
+<p style="margin-left: 5pt;"><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019436259.png" alt=""></span></p>
+<p style="margin-left: 5pt;"><span style="font-size: 14px;">完整的算法如下图所示：</span></p>
+<p style="margin-left: 5pt;"><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019447506.png" alt=""></span></p>
+<p style="margin-left: 5pt;"><span style="color: #0070c0; font-size: 14px;"><span style="color: #00ccff; font-family: 微软雅黑;">5. 值迭代</span><span style="font-family: Times New Roman;"><span style="color: #00ccff;">(Value Iteration)</span> </span></span></p>
+<p><span style="font-size: 14px;">从上面我们可以看到，策略迭代算法包含了一个策略估计的过程，而策略估计则需要扫描(sweep)所有的状态若干次，其中巨大的计算量直接影响了策略迭代算法的效率。</span><span style="font-size: 14px;">我们必须要获得精确的V<sup>π</sup>值吗？事实上不必，有几种方法可以在保证算法收敛的情况下，缩短策略估计的过程。</span></p>
+<p><span style="font-size: 14px;"><span style="color: #ff0000;">值迭代</span>（Value Iteration）就是其中非常重要的一种。它的每次迭代只扫描(sweep)了每个状态一次。值迭代的每次迭代对所有的s∈S按照下列公式更新：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019453915.png" alt=""></span></p>
+<p><span style="font-size: 14px;">即在值迭代的第k+1次迭代时，直接将能获得的最大的V<sup>π</sup>(s)值赋给V<sub>k+1</sub>。值迭代算法直接用可能转到的下一步s'的V(s')来更新当前的V(s)，算法甚至都不需要存储策略π。而实际上这种更新方式同时却改变了策略π<sub>k</sub>和V(s)的估值V<sub>k</sub>(s)。 直到算法结束后，我们再通过V值来获得最优的π。</span></p>
+<p><span style="font-size: 14px;">此外，值迭代还可以理解成是采用迭代的方式逼近1中所示的贝尔曼最优方程。</span></p>
+<p><span style="font-size: 14px;">值迭代完整的算法如图所示：</span></p>
+<p><span style="font-size: 14px;"><img src="./增强学习（三）----- MDP的动态规划解法_files/201019462191.png" alt=""></span></p>
+<p><span style="font-size: 14px;">由上面的算法可知，值迭代的最后一步，我们才根据V*(s)，获得最优策略π*。</span></p>
+<p style="margin-left: 5pt;"><span style="font-size: 14px;">一般来说值迭代和策略迭代都需要经过无数轮迭代才能精确的收敛到V*和π*， 而实践中，我们往往设定一个阈值来作为中止条件，即当V<sup>π</sup>(s)值改变很小时，我们就近似的认为获得了最优策略。在折扣回报的有限MDP(discounted finite MDPs)中，进过有限次迭代，两种算法都能收敛到最优策略π*。</span></p>
+<p><span style="font-size: 14px;">至此我们了解了马尔可夫决策过程的动态规划解法，动态规划的优点在于它有很好的数学上的解释，但是动态要求一个完全已知的环境模型，这在现实中是很难做到的。另外，当状态数量较大的时候，动态规划法的效率也将是一个问题。下一篇介绍蒙特卡罗方法，它的优点在于不需要完整的环境模型。</span></p>
+<p><span style="font-size: 13px;">PS: 如果什么没讲清楚的地方，欢迎提出，我会补充说明...</span></p>
+<p><span style="color: #0070c0; font-size: 13px;"><span style="color: #00ccff;">参考资料：</span> </span></p>
+<p><span style="font-family: Verdana; font-size: 13px;">[1] R.Sutton et al. Reinforcement learning: An introduction , 1998 </span></p>
+<p><span style="font-size: 13px;"><span style="font-family: Verdana;">[2] </span><span style="font-family: 宋体;">徐昕，增强学习及其在移动机器人导航与控制中的应用研究</span><span style="font-family: Verdana;">[D],2002</span></span></p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/jinxulin/category/459352.html" target="_blank">机器学习</a></div>
+<div id="EntryTag">标签: <a href="http://www.cnblogs.com/jinxulin/tag/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>, <a href="http://www.cnblogs.com/jinxulin/tag/%E5%A2%9E%E5%BC%BA%E5%AD%A6%E4%B9%A0/">增强学习</a>, <a href="http://www.cnblogs.com/jinxulin/tag/Machine%20learning/">Machine learning</a>, <a href="http://www.cnblogs.com/jinxulin/tag/Reinforcement%20learning/">Reinforcement learning</a>, <a href="http://www.cnblogs.com/jinxulin/tag/%E6%9C%BA%E5%99%A8%E4%BA%BA/">机器人</a></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3526542,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;f63626e5-585d-e211-aa8f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./增强学习（三）----- MDP的动态规划解法_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./增强学习（三）----- MDP的动态规划解法_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/jinxulin/" target="_blank"><img src="./增强学习（三）----- MDP的动态规划解法_files/20130316000909.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/jinxulin/">金溆林</a><br>
+            <a href="http://home.cnblogs.com/u/jinxulin/followees">关注 - 16</a><br>
+            <a href="http://home.cnblogs.com/u/jinxulin/followers">粉丝 - 27</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;f63626e5-585d-e211-aa8f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3526542,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">1</span>
+    </div>
+    <div class="buryit" onclick="votePost(3526542,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/jinxulin/p/3517377.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/jinxulin/p/3517377.html" title="发布于2014-01-14 00:21">增强学习（二）----- 马尔可夫决策过程MDP</a><br><a href="http://www.cnblogs.com/jinxulin/p/3560737.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/jinxulin/p/3560737.html" title="发布于2014-02-22 14:06">增强学习（四） ----- 蒙特卡罗方法(Monte Carlo Methods)</a><br></div>
+</div>
+
+</div>
+    <p class="postfoot">posted on <span id="post-date">2014-01-20 10:26</span> <a href="http://www.cnblogs.com/jinxulin/">金溆林</a> 阅读(<span id="post_view_count">4455</span>) 评论(<span id="post_comment_count">7</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=3526542" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/jinxulin/p/3526542.html#" onclick="AddToWz(3526542);return false;">收藏</a></p>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=144020,cb_entryId=3526542,cb_blogApp=currentBlogApp,cb_blogUserGuid='f63626e5-585d-e211-aa8f-842b2b196315',cb_entryCreatedDate='2014/1/20 10:26:00';loadViewCount(cb_entryId);</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<a name="评论"></a>
+<div id="comments">
+<h3>评论</h3>
+	
+	
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892098" class="layer">#1楼</a><a name="2892098" id="comment_anchor_2892098"></a>
+					<span>
+						 <span class="comment_date">2014-03-10 17:10</span>
+					</span>
+				<a id="a_comment_author_2892098" href="http://home.cnblogs.com/u/611600/" target="_blank">lipengdebokeyuan</a> <a href="http://msg.cnblogs.com/send/lipengdebokeyuan" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_2892098" class="blog_comment_body">现在扩展到更一般的情况，如果在某策略π下，π(s)对应的动作a有多种可能，每种可能记为π(a|s)，则状态值函数定义如下:<br>请问是把每种情况的值函数进行叠加吗？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2892098,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2892098,&#39;Bury&#39;,this)">反对(0)</a></div>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892105" class="layer">#2楼</a><a name="2892105" id="comment_anchor_2892105"></a>[<span class="louzhu">楼主</span>]
+					<span>
+						 <span class="comment_date">2014-03-10 17:16</span>
+					</span>
+				<a id="a_comment_author_2892105" href="http://www.cnblogs.com/jinxulin/" target="_blank">金溆林</a> <a href="http://msg.cnblogs.com/send/%E9%87%91%E6%BA%86%E6%9E%97" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_2892105" class="blog_comment_body"><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892098" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2892098);">@</a>
+lipengdebokeyuan<br>是的，这个了解意思就行，实际我也没怎么见过非确定策略的情况。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2892105,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2892105,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2892105_avatar" style="display:none;">http://pic.cnblogs.com/face/489049/20130316000909.png</span>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892115" class="layer">#3楼</a><a name="2892115" id="comment_anchor_2892115"></a>
+					<span>
+						 <span class="comment_date">2014-03-10 17:21</span>
+					</span>
+				<a id="a_comment_author_2892115" href="http://home.cnblogs.com/u/611600/" target="_blank">lipengdebokeyuan</a> <a href="http://msg.cnblogs.com/send/lipengdebokeyuan" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_2892115" class="blog_comment_body">嗯，谢谢。<br>请问到哪里可以找到关于策略估计和策略改进的资料？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2892115,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2892115,&#39;Bury&#39;,this)">反对(0)</a></div>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892123" class="layer">#4楼</a><a name="2892123" id="comment_anchor_2892123"></a>[<span class="louzhu">楼主</span>]
+					<span>
+						 <span class="comment_date">2014-03-10 17:27</span>
+					</span>
+				<a id="a_comment_author_2892123" href="http://www.cnblogs.com/jinxulin/" target="_blank">金溆林</a> <a href="http://msg.cnblogs.com/send/%E9%87%91%E6%BA%86%E6%9E%97" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_2892123" class="blog_comment_body"><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892115" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2892115);">@</a>
+lipengdebokeyuan<br>不客气，个人感觉RL就是做这个事的，基本的可以看看TD(λ)，sarsa(λ)等算法，参考资料我都写在文章后面了，Sutton的那本书是经典入门书，建议看看</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2892123,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2892123,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2892123_avatar" style="display:none;">http://pic.cnblogs.com/face/489049/20130316000909.png</span>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#2892127" class="layer">#5楼</a><a name="2892127" id="comment_anchor_2892127"></a>
+					<span>
+						 <span class="comment_date">2014-03-10 17:28</span>
+					</span>
+				<a id="a_comment_author_2892127" href="http://home.cnblogs.com/u/611600/" target="_blank">lipengdebokeyuan</a> <a href="http://msg.cnblogs.com/send/lipengdebokeyuan" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_2892127" class="blog_comment_body">非常感谢</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2892127,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2892127,&#39;Bury&#39;,this)">反对(0)</a></div>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#3359618" class="layer">#6楼</a><a name="3359618" id="comment_anchor_3359618"></a>
+					<span>
+						 <span class="comment_date">2016-02-04 17:59</span>
+					</span>
+				<a id="a_comment_author_3359618" href="http://home.cnblogs.com/u/588010/" target="_blank">xman78</a> <a href="http://msg.cnblogs.com/send/xman78" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_3359618" class="blog_comment_body">请问:<br>1有什么靠谱的开源实现，最好python or c,cpp<br><br>2那个字母pi是什么意思，第二讲pi还是下表</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3359618,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3359618,&#39;Bury&#39;,this)">反对(0)</a></div>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+			<h4>
+				<a href="http://www.cnblogs.com/jinxulin/p/3526542.html#3561888" class="layer">#7楼</a><a name="3561888" id="comment_anchor_3561888"></a><span id="comment-maxId" style="display:none;">3561888</span><span id="comment-maxDate" style="display:none;">2016/11/22 9:36:18</span>
+					<span>
+						 <span class="comment_date">2016-11-22 09:36</span>
+					</span>
+				<a id="a_comment_author_3561888" href="http://www.cnblogs.com/goingmyway/" target="_blank">GoingMyWay</a> <a href="http://msg.cnblogs.com/send/GoingMyWay" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</h4>
+			<p>
+				</p><div id="comment_body_3561888" class="blog_comment_body">你好，其实我最关系的不是值迭代，也不是策略迭代，而是算法经过很多次的学习之后，对于一个新的初始状态，算法从初始状态一直走到目标状态，也就是说，算法如何在不同的状态下去选择算法认为合适的action去达到下一个状态。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3561888,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3561888,&#39;Bury&#39;,this)">反对(0)</a></div>
+				&nbsp;&nbsp;<span class="comment_actions"></span>
+			<p></p>
+		
+</div><div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="http://arcapp.anruichina.com/arctrac/trac?tid=smb_azure_1212_CNBlog" target="_blank">【活动】一元专享1500元微软智能云Azure</a><br><a href="http://rongcloud.cn/reports/journal2" target="_blank">【推荐】融云发布 App 社交化白皮书 IM 提升活跃超 8 倍</a><br><a href="http://bbs.h3bpm.com/index.php?m=app&amp;app=product_download&amp;a=reg&amp;utm_source=csdn&amp;utm_medium=pic&amp;utm_campaign=show&amp;utm_content=v10&amp;utm_term=%E5%85%8D%E8%B4%B9%E4%B8%8B%E8%BD%BD" target="_blank">【推荐】自开发 零实施的BPM</a><br></div>
+<div id="opt_under_post"></div>
+<div id="ad_c1" class="c_ad_block"><a href="http://www.gcpowertools.com.cn/products/activereports_overview.htm?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=AR&amp;utm_campaign=community" target="_blank"><img width="300" height="250" src="./增强学习（三）----- MDP的动态规划解法_files/24442-20161115165230123-1587531896.png" alt=""></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/560535/" target="_blank">Bug事件持续发酵，被狂刷“一星”的《阴阳师》面临下架危机</a><br> ·  <a href="http://news.cnblogs.com/n/560531/" target="_blank">微软宣布Connected Vehicle平台，宝马和Nissan内置Cortana</a><br> ·  <a href="http://news.cnblogs.com/n/560529/" target="_blank">他在苹果工作了17年，认为“苹果输给了自己”</a><br> ·  <a href="http://news.cnblogs.com/n/560528/" target="_blank">三星成立1.5亿美元投资基金 用以支持AI、VR等初创企业</a><br> ·  <a href="http://news.cnblogs.com/n/560527/" target="_blank">Slack都有基金了，并且围绕自身投资了11个新项目</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="ad_c2" class="c_ad_block"><a href="http://bbs.h3bpm.com/index.php?m=app&amp;app=product_download&amp;a=reg&amp;utm_source=csdn&amp;utm_medium=pic&amp;utm_campaign=show&amp;utm_content=v10&amp;utm_term=%E5%85%8D%E8%B4%B9%E4%B8%8B%E8%BD%BD" target="_blank"><img width="468" height="60" src="./增强学习（三）----- MDP的动态规划解法_files/35695-20161213142353073-1602158633.jpg" alt=""></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/556770/" target="_blank">写给未来的程序媛</a><br> ·  <a href="http://kb.cnblogs.com/page/558087/" target="_blank">高质量的工程代码为什么难写</a><br> ·  <a href="http://kb.cnblogs.com/page/555750/" target="_blank">循序渐进地代码重构</a><br> ·  <a href="http://kb.cnblogs.com/page/554496/" target="_blank">技术的正宗与野路子</a><br> ·  <a href="http://kb.cnblogs.com/page/553682/" target="_blank">陈皓：什么是工程师文化？</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</div>
+<div id="rightmenu">
+	
+		
+<div id="my_links">
+<h3>导航</h3>
+<ul>
+<li><a id="blog_nav_sitehome" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" href="http://www.cnblogs.com/jinxulin/">首页</a></li>
+<!--<li><a id="blog_nav_newpost" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>-->
+<li><a id="blog_nav_contact" rel="nofollow" href="https://msg.cnblogs.com/send/%E9%87%91%E6%BA%86%E6%9E%97">联系</a></li>
+<li><a id="blog_nav_rss" href="http://www.cnblogs.com/jinxulin/rss">订阅</a></li><!--<a id="blog_nav_rss_image" href="http://www.cnblogs.com/jinxulin/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>-->
+<li><a id="blog_nav_admin" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+</div>
+		<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2016/12/01&#39;);return false;">&lt;</a></td><td align="center">2017年1月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2017/02/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td></tr><tr><td class="CalWeekendDay" align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td class="CalTodayDay" align="center">6</td><td class="CalWeekendDay" align="center">7</td></tr><tr><td class="CalWeekendDay" align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td class="CalWeekendDay" align="center">14</td></tr><tr><td class="CalWeekendDay" align="center">15</td><td align="center">16</td><td align="center">17</td><td align="center">18</td><td align="center">19</td><td align="center">20</td><td class="CalWeekendDay" align="center">21</td></tr><tr><td class="CalWeekendDay" align="center">22</td><td align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td class="CalWeekendDay" align="center">28</td></tr><tr><td class="CalWeekendDay" align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+		
+<h3>公告</h3>
+<div class="newsItem">
+	<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>		
+		<div id="blog_stats">
+<div id="blog_stats">
+<h3>统计</h3>
+<ul>
+<li>随笔 - 6
+</li><li>文章 - 0
+</li><li>评论 - 17
+<!--<li>引用 - 0-->
+</li>
+</ul>
+</div></div>
+		<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/jinxulin/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/jinxulin/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/jinxulin/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/jinxulin/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/jinxulin/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block">
+<h3 class="catListTitle">我的标签</h3>
+<div id="MyTag">
+<ul>
+<li><a href="http://www.cnblogs.com/jinxulin/tag/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>(6)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/%E5%A2%9E%E5%BC%BA%E5%AD%A6%E4%B9%A0/">增强学习</a>(5)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/Machine%20learning/">Machine learning</a>(5)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/Reinforcement%20learning/">Reinforcement learning</a>(5)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/%E6%9C%BA%E5%99%A8%E4%BA%BA/">机器人</a>(4)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/">强化学习</a>(3)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/EM%E7%AE%97%E6%B3%95/">EM算法</a>(1)</li><li><a href="http://www.cnblogs.com/jinxulin/tag/Q%20learning/">Q learning</a>(1)</li>
+</ul>
+</div></div><div id="sidebar_categories">
+		<h3>随笔分类<span style="font-size:11px;font-weight:normal">(6)</span></h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/jinxulin/category/459352.html">机器学习(6)</a> </li>
+			
+				<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/jinxulin/category/459353.html">随笔</a> </li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案<span style="font-size:11px;font-weight:normal">(6)</span></h3>
+		
+				<ul>
+			
+				<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/jinxulin/archive/2016/01.html">2016年1月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/jinxulin/archive/2014/02.html">2014年2月 (1)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/jinxulin/archive/2014/01.html">2014年1月 (3)</a> </li>
+			
+				<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/jinxulin/archive/2013/05.html">2013年5月 (1)</a> </li>
+			
+				</ul>
+			
+	</div><div id="sidebar_scorerank" class="sidebar-block">
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		15465
+	</li><li>
+		排名 -
+		15134
+	</li>
+</ul>
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#3561888">1. Re:增强学习（三）----- MDP的动态规划解法</a></li>
+        <li class="recent_comment_body">你好，其实我最关系的不是值迭代，也不是策略迭代，而是算法经过很多次的学习之后，对于一个新的初始状态，算法从初始状态一直走到目标状态，也就是说，算法如何在不同的状态下去选择算法认为合适的action去达......</li>
+        <li class="recent_comment_author">--GoingMyWay</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/jinxulin/p/3517377.html#3408153">2. Re:增强学习（二）----- 马尔可夫决策过程MDP</a></li>
+        <li class="recent_comment_body">你好，我想问一下算值函数时候为什么在里面加了个E[]?还有那个公式前面好像多乘了个$\gamma$</li>
+        <li class="recent_comment_author">--Hiroki</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/jinxulin/p/3517377.html#3400853">3. Re:增强学习（二）----- 马尔可夫决策过程MDP</a></li>
+        <li class="recent_comment_body">谢谢楼主，写得特别好。对了，部分可观察马尔可夫决策过程及其解法是怎样的？请楼主指教。。</li>
+        <li class="recent_comment_author">--行僧</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/jinxulin/p/3526542.html#3359618">4. Re:增强学习（三）----- MDP的动态规划解法</a></li>
+        <li class="recent_comment_body">请问:<br>1有什么靠谱的开源实现，最好python or c,cpp<br><br>2那个字母pi是什么意思，第二讲pi还是下表</li>
+        <li class="recent_comment_author">--xman78</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/jinxulin/p/3517377.html#3321805">5. Re:增强学习（二）----- 马尔可夫决策过程MDP</a></li>
+        <li class="recent_comment_body">多谢楼主，非常有用！</li>
+        <li class="recent_comment_author">--陈家小Q</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/jinxulin/p/3517377.html">1. 增强学习（二）----- 马尔可夫决策过程MDP(7215)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/3526542.html">2. 增强学习（三）----- MDP的动态规划解法(4455)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/3511298.html">3. 增强学习（一） -----  基本概念(3962)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/5116332.html">4. 增强学习（五）----- 时间差分学习(Q learning, Sarsa learning)(3710)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/3560737.html">5. 增强学习（四） ----- 蒙特卡罗方法(Monte Carlo Methods)(3397)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/jinxulin/p/3517377.html">1. 增强学习（二）----- 马尔可夫决策过程MDP(10)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/3526542.html">2. 增强学习（三）----- MDP的动态规划解法(7)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/jinxulin/p/3517377.html">1. 增强学习（二）----- 马尔可夫决策过程MDP(3)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/5116332.html">2. 增强学习（五）----- 时间差分学习(Q learning, Sarsa learning)(3)</a></li><li><a href="http://www.cnblogs.com/jinxulin/p/3526542.html">3. 增强学习（三）----- MDP的动态规划解法(1)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+        
+		
+<div id="footer">
+	Powered by: 
+	<br>
+	
+	<a id="Footer1_Hyperlink3" name="Hyperlink1" href="http://www.cnblogs.com/" style="font-family:Verdana;font-size:12px;">博客园</a>
+	<br>
+	Copyright © 金溆林
+</div>
+	
+</div>			
+			
+	
+
+
+
+</body></html>
